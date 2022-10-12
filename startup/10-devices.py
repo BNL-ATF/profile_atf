@@ -6,6 +6,7 @@ from contextlib import ContextDecorator
 
 from atfdb import atfdb
 from atfdb.ophyd import ATFSignalNoConn, ReadOnlyException, open_close_conn
+from bluesky import SupplementalData
 from ophyd import Component as Cpt
 from ophyd import Device, Signal
 from ophyd.sim import NullStatus
@@ -212,3 +213,7 @@ GQ10 = channel_dict["GQ10"]["ophyd"]
 GQ11 = channel_dict["GQ11"]["ophyd"]
 GQ12 = channel_dict["GQ12"]["ophyd"]
 HeNe1 = channel_dict["HeNe1"]["ophyd"]
+
+sd = SupplementalData()
+RE.preprocessors.append(sd)
+sd.baseline.extend([GQ10, GQ11, GQ12])
