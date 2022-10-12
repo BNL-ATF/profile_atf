@@ -47,7 +47,7 @@ PS_H_line = {
     "HT1V": "DARL2",
     "HT2H": "DARL3",
     "HT2V": "DARL4",
-    "HQ1": "DARL149",
+    "HQ1": "DARL149",  # 'ihq1' in Sirepo
     "HQ2": "DARL150",
     "HQ3": "DARL151",
     "HT3H": "DARL9",
@@ -298,7 +298,7 @@ class FrameGrabber(Device):
 fg3 = FrameGrabber(name="fg3")
 
 
-for el_id in ["GT9V", "GT10V", "GQ10", "GQ11", "GQ12"]:
+for el_id in ["GT9V", "GT10V", "HT2V", "GQ10", "GQ11", "GQ12", "HQ1"]:
     el = channel_dict[el_id]
     channel_dict[el_id]["ophyd"] = ATFSignal(
         name=f"{el_id}_{el['name']}",  # ophyd API
@@ -309,9 +309,11 @@ for el_id in ["GT9V", "GT10V", "GQ10", "GQ11", "GQ12"]:
 
 GT9V = channel_dict["GT9V"]["ophyd"]
 GT10V = channel_dict["GT10V"]["ophyd"]
+HT2V = channel_dict["HT2V"]["ophyd"]
 GQ10 = channel_dict["GQ10"]["ophyd"]
 GQ11 = channel_dict["GQ11"]["ophyd"]
 GQ12 = channel_dict["GQ12"]["ophyd"]
+HQ1 = channel_dict["HQ1"]["ophyd"]
 
 
 def StopFGSavePicRunFG(fgN, FullPathFileName):
