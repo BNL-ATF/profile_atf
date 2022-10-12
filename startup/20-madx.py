@@ -2,7 +2,7 @@ import os
 import datetime
 
 from sirepo_bluesky.sirepo_bluesky import SirepoBluesky
-from sirepo_bluesky.sirepo_ophyd import create_classes
+from sirepo_bluesky.sirepo_ophyd import create_classes, create_variable_classes
 from sirepo_bluesky.madx_flyer import MADXFlyer
 from sirepo_bluesky.madx_handler import MADXFileHandler
 
@@ -23,24 +23,32 @@ else:
 
     classes, objects = create_classes(connection.data,
                                       connection=connection)
+    classes_var, objects_var = create_variable_classes(connection.data,
+                                                       connection=connection)
     globals().update(**objects)
 
     madx_flyer = MADXFlyer(connection=connection,
                            root_dir="/tmp/sirepo_flyer_data/",
                            report="elementAnimation250-20")
 
-# RE(bp.fly([madx_flyer]))
-#
-# hdr = db["2c8504e4-8ac9-4e56-ab42-da5e3cb9b4e0"]
-# hdr.table(stream_name="madx_flyer", fill=True)
-#
-# def madx_plan():
-#     yield from bps.mv(fq1.k1, "ifq1/5.4444e-3/hr")
-#     yield from bp.fly([madx_flyer])
-#
-# RE(madx_plan())
-#
-# hdr2 = db["a3ed4aea-068e-4b15-85f7-3abdcf5cccc2"]
-#
-# hdr.table(stream_name="madx_flyer", fill=True).loc[21]
-# hdr2.table(stream_name="madx_flyer", fill=True).loc[21]
+
+    def madx_plan(parameter="ihq1", value=2.0):
+        """A bluesky plan to use MAD-X simulation package within Sirepo (via sirepo-bluesky lib).
+
+        Run:
+
+            uid, = RE(bp.fly([madx_flyer]))
+
+        Data access:
+
+            hdr = db[uid]
+            tbl = hdr.table(stream_name="madx_flyer", fill=True)
+
+        Plotting:
+
+            plt.plot(tbl['madx_flyer_S'], tbl['madx_flyer_BETX'])
+            plt.plot(tbl['madx_flyer_S'], tbl['madx_flyer_BETY'])
+
+        """
+        yield from bps.mv(objects_var[parameter].value, value)
+        return (yield from bp.fly([madx_flyer]))
