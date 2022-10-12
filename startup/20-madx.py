@@ -37,7 +37,7 @@ else:
 
         Run:
 
-            uid, = RE(bp.fly([madx_flyer]))
+            uid, = RE(madx_plan())
 
         Data access:
 
