@@ -346,3 +346,9 @@ def StopFGSavePicRunFG(fgN, FullPathFileName):
 # StopFGSavePicRunFG(3, 'C:/Images/AE124/20220908/test.asc')
 # image_stats = read_fg(3)
 # print(image_stats)
+
+from bluesky import SupplementalData
+
+sd = SupplementalData()
+RE.preprocessors.append(sd)
+sd.baseline.extend([GQ10, GQ11, GQ12])
