@@ -13,6 +13,8 @@ jobs:
         python-version: ["3.9"]
         pylon-version: ["5.2.0.13457-deb0_amd64"]
       fail-fast: false
+    env:
+      TZ: America/New_York
 
     defaults:
       run:
