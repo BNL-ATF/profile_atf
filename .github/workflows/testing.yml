@@ -59,6 +59,7 @@ jobs:
           # line 1: GSETTINGS_SCHEMA_DIR_CONDA_BACKUP: unbound variable
           set -vxeo pipefail
           conda env list
+          mamba install -c conda-forge -y numpy matplotlib
           pip install -v pypylon
           pip list
           conda list
