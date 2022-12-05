@@ -1,31 +1,54 @@
 import datetime
+import h5py
 import itertools
+import logging
+import os
 
 import matplotlib.pyplot as plt
 import numpy as np
-from pypylon import pylon
 
+from pypylon import pylon
+from pathlib import Path
+from collections import deque
 from ophyd import Component as Cpt
 from ophyd import Device, Signal
-from ophyd.sim import NullStatus
-
-import os
+from ophyd.sim import NullStatus, new_uid
+from area_detector_handlers.handlers import HandlerBase
+from event_model import compose_resource
 
 os.environ['PYLON_CAMEMU'] = "1"
 
-plt.ion()
+logger = logging.getLogger("basler")
+
+class ExternalFileReference(Signal):
+    """
+    A pure software Signal that describe()s an image in an external file.
+    """
+
+    def describe(self):
+        resource_document_data = super().describe()
+        resource_document_data[self.name].update(
+            dict(
+                external="FILESTORE:",
+                dtype="array",
+            )
+        )
+        return resource_document_data
 
 class BaslerCamera(Device):
 
-    image = Cpt(Signal, kind="normal")
+    image = Cpt(ExternalFileReference, kind="normal")
     mean  = Cpt(Signal, kind="hinted")
     shape = Cpt(Signal, kind="normal")
 
-    def __init__(self, name='basler_cam',
-                    sim_id=None, watch_name=None,
-                    sirepo_server='http://10.10.10.10:8000', source_simulation=False,
-                    root_dir='/tmp/sirepo_det_data', **kwargs):
+    def __init__(self, name='basler_cam', root_dir='/tmp/basler', **kwargs): # where should root_dir be?
         super().__init__(name=name, **kwargs)
+
+        self._root_dir = root_dir
+
+        self._asset_docs_cache = deque()
+        self._resource_document = None
+        self._datum_factory = None
 
         transport_layer_factory = pylon.TlFactory.GetInstance()
         device_info_list = transport_layer_factory.EnumerateDevices()
@@ -50,33 +73,33 @@ class BaslerCamera(Device):
         self.active_format = self.camera_object.PixelFormat.GetValue()
         self.formats_supported = self.camera_object.PixelFormat.Symbolics
         self.payload_size = self.camera_object.PayloadSize()
-        self.grab_timeout = 5000 # ms
+        self.grab_timeout = 5000 
 
+        self._frame_shape = (self.height, self.width)
         self.camera_object.Close()
 
     def grab_images(self, num=10):
 
         self.camera_object.StartGrabbingMax(num)
         counter = itertools.count()
-        first_image = np.zeros((self.height, self.width))
+        images  = []
+
         while self.camera_object.IsGrabbing():
             grab_result = self.camera_object.RetrieveResult(self.grab_timeout, pylon.TimeoutHandling_ThrowException)
             if grab_result.GrabSucceeded():
                 image = grab_result.Array
                 current_frame = next(counter)
-                if current_frame == 1:
-                    first_image = np.copy(image)
                 print(
                     f"{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')} "
                     f"{current_frame:04d} {image.shape = } {image.mean() = } "
                     f"{image[0, 0] = } {image[-1, -1] = }"
                 )
+                images.append(image)
 
             grab_result.Release()
 
         self.camera_object.StopGrabbing()
-
-        return image
+        return np.array(images)
 
     def trigger(self, verbose=True):
 
@@ -104,9 +127,27 @@ class BaslerCamera(Device):
         desired_pixel_format = "Mono8"
         self.camera_object.PixelFormat.SetValue(desired_pixel_format)
 
-        image = self.grab_images(num=10)
-        self.update_components(image)
+        images = self.grab_images(num=10)
         self.camera_object.Close()
+
+        logger.debug(f"original shape: {images.shape}")
+        # Averaging over all frames and summing 3 RGB channels
+        averaged = images.mean(axis=0)
+
+        current_frame = next(self._counter)
+        self._dataset.resize((current_frame + 1, *self._frame_shape))
+        logger.debug(f"{self._dataset = }\n{self._dataset.shape = }")
+        self._dataset[current_frame, :, :] = averaged
+
+        datum_document = self._datum_factory(datum_kwargs={"frame": current_frame})
+        self._asset_docs_cache.append(("datum", datum_document))
+
+        self.image.put(datum_document["datum_id"])
+        self.mean.put(averaged.mean())
+
+        #self.update_components(image)
+        super().trigger()
+        return NullStatus()
 
     def update_components(self, image):
 
@@ -114,5 +155,61 @@ class BaslerCamera(Device):
         self.shape.put(image.shape)
         self.mean.put(image.mean())
 
-cam = BaslerCamera()
-cam.trigger()
+    def stage(self):
+
+        super().stage()
+        date = datetime.datetime.now()
+        self._assets_dir = date.strftime("%Y/%m/%d")
+        data_file = f"{new_uid()}.h5"
+
+        self._resource_document, self._datum_factory, _ = compose_resource(
+            start={"uid": "needed for compose_resource() but will be discarded"},
+            spec="BASLER_CAM_HDF5",
+            root=self._root_dir,
+            resource_path=str(Path(self._assets_dir) / Path(data_file)),
+            resource_kwargs={},
+        )
+
+        self._data_file = str(
+            Path(self._resource_document["root"])
+            / Path(self._resource_document["resource_path"])
+        )
+
+        # now discard the start uid, a real one will be added later
+        self._resource_document.pop("run_start")
+        self._asset_docs_cache.append(("resource", self._resource_document))
+
+        logger.debug(f"{self._data_file = }")
+
+        self._h5file_desc = h5py.File(self._data_file, "x")
+        group = self._h5file_desc.create_group("/entry")
+        self._dataset = group.create_dataset("averaged",
+                                             data=np.full(fill_value=np.nan,
+                                                          shape=(1, *self._frame_shape)),
+                                             maxshape=(None, *self._frame_shape),
+                                             chunks=(1, *self._frame_shape),
+                                             dtype="float64",
+                                             compression="lzf")
+        self._counter = itertools.count()
+
+    def unstage(self):
+        super().unstage()
+        del self._dataset
+        self._h5file_desc.close()
+        self._resource_document = None
+        self._datum_factory = None
+
+    def collect_asset_docs(self):
+        items = list(self._asset_docs_cache)
+        self._asset_docs_cache.clear()
+        for item in items:
+            yield item
+
+class BaslerCamHDF5Handler(HandlerBase):
+    specs = {"BASLER_CAM_HDF5"}
+    def __init__(self, filename):
+        self._name = filename
+    def __call__(self, frame):
+        with h5py.File(self._name, "r") as f:
+            entry = f["/entry/averaged"]
+            return entry[frame]
