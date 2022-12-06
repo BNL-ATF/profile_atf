@@ -1,8 +1,10 @@
+print(f"Loading {__file__}")
+
 import os
 import datetime
 
 from sirepo_bluesky.sirepo_bluesky import SirepoBluesky
-from sirepo_bluesky.sirepo_ophyd import create_classes, create_variable_classes
+from sirepo_bluesky.sirepo_ophyd import create_classes
 from sirepo_bluesky.madx_flyer import MADXFlyer
 from sirepo_bluesky.madx_handler import MADXFileHandler
 
@@ -19,12 +21,11 @@ if ATF_SIREPO_URL in (None, ""):
 else:
     print(f"Using Sirepo at {ATF_SIREPO_URL}")
     connection = SirepoBluesky(ATF_SIREPO_URL)
-    data, schema = connection.auth("madx", "00000002")
+    data, schema = connection.auth("madx", "00000002")  # BL2_TDC example
 
     classes, objects = create_classes(connection.data,
-                                      connection=connection)
-    classes_var, objects_var = create_variable_classes(connection.data,
-                                                       connection=connection)
+                                      connection=connection,
+                                      extra_model_fields=["rpnVariables", "commands", "elements"])
     globals().update(**objects)
 
     madx_flyer = MADXFlyer(connection=connection,
