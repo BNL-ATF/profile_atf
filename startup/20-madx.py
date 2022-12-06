@@ -21,9 +21,11 @@ else:
 
     print(f"Using Sirepo at {ATF_SIREPO_URL}")
     connection = SirepoBluesky(ATF_SIREPO_URL)
-    data, schema = connection.auth("madx", "00000002")
+    data, schema = connection.auth("madx", "00000002")  # BL2_TDC example
 
-    classes, objects = create_classes(connection.data, connection=connection)
+    classes, objects = create_classes(connection.data,
+                                      connection=connection,
+                                      extra_model_fields=["rpnVariables", "commands", "elements"])
     globals().update(**objects)
 
     madx_flyer = MADXFlyer(
