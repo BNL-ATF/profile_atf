@@ -35,6 +35,9 @@ jobs:
           export ATF_SOCKET_PORT=5000
           echo "ATF_SOCKET_PORT=${ATF_SOCKET_PORT}" >> $GITHUB_ENV
 
+          export ATF_SIREPO_URL="http://localhost:8000"
+          echo "ATF_SIREPO_URL=${ATF_SIREPO_URL}" >> $GITHUB_ENV
+
           export PYLON_CAMEMU=2
           echo "PYLON_CAMEMU=${PYLON_CAMEMU}" >> $GITHUB_ENV
 
