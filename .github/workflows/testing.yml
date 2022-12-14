@@ -70,7 +70,9 @@ jobs:
           # line 1: GSETTINGS_SCHEMA_DIR_CONDA_BACKUP: unbound variable
           set -vxeo pipefail
           conda env list
-          mamba install -c conda-forge -y numpy matplotlib ipython ophyd bluesky databroker sirepo-bluesky
+          # mamba install -c conda-forge -y numpy matplotlib ipython ophyd bluesky databroker sirepo-bluesky
+          pip install numpy matplotlib ipython ophyd bluesky databroker sirepo-bluesky
+          mamba install -c conda-forge -y srwpy shadow3
           # pip install -v pypylon
           pip list
           conda list
@@ -80,7 +82,7 @@ jobs:
           set -vxuo pipefail
           git clone https://github.com/NSLS-II/sirepo-bluesky.git
           cd sirepo-bluesky/
-          bash scripts/start_sirepo -d
+          bash scripts/start_sirepo.sh -d
           sleep 10
 
       - name: Start fake socket server
