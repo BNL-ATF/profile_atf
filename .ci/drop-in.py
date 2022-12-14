@@ -1,10 +1,10 @@
-GT9V.read()
-GT10V.read()
-GQ10.read()
-GQ11.read()
-GQ12.read()
+print(GT9V.read())
+print(GT10V.read())
+print(GQ10.read())
+print(GQ11.read())
+print(GQ12.read())
 
-fg3.read()
+print(fg3.read())
 
 uid, = RE(bp.fly([madx_flyer]))
 
