@@ -29,7 +29,7 @@ def server_program(seed=0):
     rng = default_rng(seed)
 
     while True:
-        # receive data stream. it won't accept data packet greater than 1024 bytes
+        # receive data stream. it won't accept data packet greater than `recv_buffer_size` bytes
         data = conn.recv(recv_buffer_size).decode()
         if not data:
             # if data is not received break
