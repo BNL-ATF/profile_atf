@@ -1,3 +1,6 @@
+"""
+Based on https://www.digitalocean.com/community/tutorials/python-socket-programming-server-client.
+"""
 import os
 import socket
 
