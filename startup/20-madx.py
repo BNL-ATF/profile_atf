@@ -19,7 +19,7 @@ if ATF_SIREPO_URL in (None, ""):
 else:
     print(f"Using Sirepo at {ATF_SIREPO_URL}")
     connection = SirepoBluesky(ATF_SIREPO_URL)
-    data, schema = connection.auth("madx", "00000001")
+    data, schema = connection.auth("madx", "00000002")
 
     classes, objects = create_classes(connection.data,
                                       connection=connection)
