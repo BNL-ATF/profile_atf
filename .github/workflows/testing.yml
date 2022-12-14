@@ -82,7 +82,7 @@ jobs:
 
       - name: Get Sirepo running
         run: |
-          set -vxuo pipefail
+          set -vxeuo pipefail
           git clone https://github.com/NSLS-II/sirepo-bluesky.git
           cd sirepo-bluesky/
           . scripts/start_sirepo.sh -d
@@ -105,12 +105,18 @@ jobs:
 
       - name: Start fake socket server
         run: |
-          set -vxuo pipefail
+          set -vxeuo pipefail
           nohup python .ci/srv.py > /tmp/socket.log 2>&1 &
+
+      - name: Prepare databroker config
+        run: |
+          set -vxeuo pipefail
+          mkdir -v -p $HOME/.config/databroker/
+          cp -v configs/databroker/local.yml $HOME/.config/databroker/
 
       - name: Test the code
         run: |
-          set -vxuo pipefail
+          set -vxeuo pipefail
           # This is what IPython does internally to load the startup files:
           command="
           import os
@@ -136,5 +142,5 @@ jobs:
 
       - name: Check socket server logs
         run: |
-          set -vxuo pipefail
+          set -vxeuo pipefail
           cat /tmp/socket.log
