@@ -138,14 +138,20 @@ jobs:
 
           ipython --profile=test -c "$command"
           status=$?
-          docker ps -a
-          echo "Sirepo docker container id: ${SIREPO_DOCKER_CONTAINER_ID}"
-          docker logs ${SIREPO_DOCKER_CONTAINER_ID}
-          if [ $status -gt 0 ]; then
-              exit $status
-          fi
+          export ATF_PROFILE_TEST_STATUS="${status}"
+          echo "ATF_PROFILE_TEST_STATUS=${ATF_PROFILE_TEST_STATUS}" >> $GITHUB_ENV
 
       - name: Check socket server logs
         run: |
           set -vxeuo pipefail
           cat /tmp/socket.log
+
+      - name: Check Sirepo server logs
+        run: |
+          set -vxeuo pipefail
+          docker ps -a
+          echo "Sirepo docker container id: ${SIREPO_DOCKER_CONTAINER_ID}"
+          docker logs ${SIREPO_DOCKER_CONTAINER_ID}
+          if [ ${ATF_PROFILE_TEST_STATUS} -gt 0 ]; then
+              exit ${ATF_PROFILE_TEST_STATUS}
+          fi
