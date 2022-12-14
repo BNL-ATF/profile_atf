@@ -26,6 +26,15 @@ jobs:
           export REPOSITORY_NAME=${GITHUB_REPOSITORY#*/}  # just the repo, as opposed to org/repo
           echo "REPOSITORY_NAME=${REPOSITORY_NAME}" >> $GITHUB_ENV
 
+          export ATF_OPEN_CONN_ONCE="yes"
+          echo "ATF_OPEN_CONN_ONCE=${ATF_OPEN_CONN_ONCE}" >> $GITHUB_ENV
+
+          export ATF_SOCKET_HOST="localhost"
+          echo "ATF_SOCKET_HOST=${ATF_SOCKET_HOST}" >> $GITHUB_ENV
+
+          export ATF_SOCKET_PORT=5000
+          echo "ATF_SOCKET_PORT=${ATF_SOCKET_PORT}" >> $GITHUB_ENV
+
           export PYLON_CAMEMU=2
           echo "PYLON_CAMEMU=${PYLON_CAMEMU}" >> $GITHUB_ENV
 
@@ -61,13 +70,44 @@ jobs:
           # line 1: GSETTINGS_SCHEMA_DIR_CONDA_BACKUP: unbound variable
           set -vxeo pipefail
           conda env list
-          mamba install -c conda-forge -y numpy matplotlib
-          pip install -v pypylon
+          mamba install -c conda-forge -y numpy matplotlib ipython ophyd bluesky databroker sirepo-bluesky
+          # pip install -v pypylon
           pip list
           conda list
+
+      - name: Get Sirepo running
+        run: |
+          set -vxuo pipefail
+          git clone https://github.com/NSLS-II/sirepo-bluesky.git
+          cd sirepo-bluesky/
+          bash scripts/start_sirepo -d
+          sleep 10
+
+      - name: Start fake socket server
+        run: |
+          set -vxuo pipefail
+          nohup python .ci/srv.py > /tmp/socket.log 2>&1 &
 
       - name: Test the code
         run: |
           set -vxuo pipefail
-          wget ${{ secrets.PYLON_GRAB_SCRIPT }}/pylon_grab.py -O pylon_grab.py
-          python pylon_grab.py
+          # This is what IPython does internally to load the startup files:
+          command="${connection_timeout}
+          import os
+          import glob
+          ip = get_ipython()
+          startup_files = sorted(glob.glob(os.path.join(os.getcwd(), 'startup/*.py')))
+          if not startup_files:
+              raise SystemExit(f'Cannot find any startup files in {os.getcwd()}')
+          for f in startup_files:
+              if not os.path.isfile(f):
+                  raise FileNotFoundError(f'File {f} cannot be found.')
+              print(f'Executing {f} in CI')
+              ip.parent._exec_file(f)"
+
+          ipython --profile=test -c "$command"
+
+      - name: Check socket server logs
+        run: |
+          set -vxuo pipefail
+          cat /tmp/socket.log
