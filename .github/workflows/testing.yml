@@ -6,7 +6,7 @@ on:
 
 jobs:
   run_tests:
-    name: Test pylon camera
+    name: Test IPython startup files
     runs-on: ubuntu-latest
     strategy:
       matrix:
