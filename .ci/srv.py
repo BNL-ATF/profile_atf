@@ -1,12 +1,13 @@
 import os
 import socket
+
 from numpy.random import default_rng
 
 
 def server_program(seed=0):
     # get the hostname
     host = os.getenv("ATF_SOCKET_HOST", "localhost")
-    port = os.getenv("ATF_SOCKET_PORT", 5000)   # initiate port no above 1024
+    port = os.getenv("ATF_SOCKET_PORT", 5000)  # initiate port no above 1024
 
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     # look closely. The bind() function takes tuple as argument
@@ -42,5 +43,5 @@ def server_program(seed=0):
     conn.close()  # close the connection
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     server_program()
