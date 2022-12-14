@@ -9,8 +9,8 @@ def server_program(seed=0):
     host = os.getenv("ATF_SOCKET_HOST", "localhost")
     port = int(os.getenv("ATF_SOCKET_PORT", 5000))  # initiate port no above 1024
 
-    recv_buffer_size = int(os.getenv(ATF_DB_RECEIVE_BUFFER_SIZE, 5120))
-    send_buffer_size = int(os.getenv(ATF_DB_SEND_BUFFER_SIZE, 5120))
+    recv_buffer_size = int(os.getenv("ATF_DB_RECEIVE_BUFFER_SIZE", 5120))
+    send_buffer_size = int(os.getenv("ATF_DB_SEND_BUFFER_SIZE", 5120))  # noqa F841
 
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     # look closely. The bind() function takes tuple as argument
