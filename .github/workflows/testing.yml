@@ -47,12 +47,12 @@ jobs:
       - name: Checkout the code
         uses: actions/checkout@v3
 
-      - name: Install Pylon .deb package
-        run: |
-          # For reference: https://www.gnu.org/software/bash/manual/html_node/The-Set-Builtin.html.
-          set -vxeuo pipefail
-          wget --progress=dot:mega ${{ secrets.PYLON_DOWNLOAD_URL_BASE }}/pylon_${{ matrix.pylon-version }}.deb -O pylon.deb
-          sudo dpkg -i pylon.deb
+      # - name: Install Pylon .deb package
+      #   run: |
+      #     # For reference: https://www.gnu.org/software/bash/manual/html_node/The-Set-Builtin.html.
+      #     set -vxeuo pipefail
+      #     wget --progress=dot:mega ${{ secrets.PYLON_DOWNLOAD_URL_BASE }}/pylon_${{ matrix.pylon-version }}.deb -O pylon.deb
+      #     sudo dpkg -i pylon.deb
 
       - name: Set up Python ${{ matrix.python-version }} with conda
         uses: conda-incubator/setup-miniconda@v2
