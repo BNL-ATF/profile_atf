@@ -76,7 +76,7 @@ jobs:
           # mamba install -c conda-forge -y numpy matplotlib ipython ophyd bluesky databroker sirepo-bluesky
           pip install numpy matplotlib ipython ophyd bluesky databroker sirepo-bluesky
           mamba install -c conda-forge -y srwpy shadow3
-          # pip install -v pypylon
+          pip install -v git+https://github.com/BNL-ATF/ophyd-basler@atf-session-20221215
           pip list
           conda list
 
