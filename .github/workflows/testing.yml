@@ -38,7 +38,7 @@ jobs:
           export ATF_SIREPO_URL="http://localhost:8000"
           echo "ATF_SIREPO_URL=${ATF_SIREPO_URL}" >> $GITHUB_ENV
 
-          export PYLON_CAMEMU=2
+          export PYLON_CAMEMU=10
           echo "PYLON_CAMEMU=${PYLON_CAMEMU}" >> $GITHUB_ENV
 
           export PYLON_ROOT="/opt/pylon5"
