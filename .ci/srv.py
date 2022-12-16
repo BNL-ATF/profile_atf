@@ -1,10 +1,15 @@
 """
 Based on https://www.digitalocean.com/community/tutorials/python-socket-programming-server-client.
 """
+import datetime
 import os
 import socket
 
 from numpy.random import default_rng
+
+
+def print_log(msg):
+    print(f"{datetime.datetime.now().isoformat()} {msg}")
 
 
 def server_program(seed=0):
@@ -22,7 +27,7 @@ def server_program(seed=0):
     # configure how many client the server can listen simultaneously
     server_socket.listen(2)
     conn, address = server_socket.accept()  # accept new connection
-    print("Connection from: " + str(address))
+    print_log("Connection from: " + str(address))
     data = "greeting"
     conn.send(data.encode())  # send data to the client
 
@@ -35,17 +40,21 @@ def server_program(seed=0):
             # if data is not received break
             break
         data = str(data)
-        print(f"from connected user: {data}")
+        print_log(f"from connected user: {data}")
         if data.startswith("GETCHIDX"):
             reply = f"{rng.integers(0, 100)}"
-            print(f"reply to client: {reply}")
+            print_log(f"reply to client: {reply}")
             conn.send(reply.encode())  # send data to the client
-        elif data.startswith(("GETRS", "GETDS", "PUTRS", "PUTDS")):
+        elif data.startswith(("GETRS", "GETDS")):
             reply = f"{rng.random()}"
-            print(f"reply to client: {reply}")
+            print_log(f"reply to client: {reply}")
+            conn.send(reply.encode())  # send data to the client
+        elif data.startswith(("PUTRS", "PUTDS")):
+            reply = f"PUTOK {data.split()[-1]}"
+            print_log(f"reply to client: {reply}")
             conn.send(reply.encode())  # send data to the client
         else:
-            print(f"{data = }")
+            print_log(f"{data = }")
     conn.close()  # close the connection
 
 
