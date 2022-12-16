@@ -1,4 +1,11 @@
+print(f"Loading {__file__}")
+
+from datetime import datetime
+from ophyd.utils import make_dir_tree
 from pprint import pprint
+
+root_dir = "/tmp/basler"
+_ = make_dir_tree(datetime.now().year, base_path=root_dir)
 
 pprint(GT9V.read())
 pprint(GT10V.read())
