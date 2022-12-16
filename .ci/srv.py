@@ -40,7 +40,7 @@ def server_program(seed=0):
             reply = f"{rng.integers(0, 100)}"
             print(f"reply to client: {reply}")
             conn.send(reply.encode())  # send data to the client
-        elif data.startswith(("GETRS", "GETDS")):
+        elif data.startswith(("GETRS", "GETDS", "PUTRS", "PUTDS")):
             reply = f"{rng.random()}"
             print(f"reply to client: {reply}")
             conn.send(reply.encode())  # send data to the client
