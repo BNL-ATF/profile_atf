@@ -22,7 +22,8 @@ pprint(GPOP13.summary())
 # Basler + Laser scan:
 uid1, = RE(bp.scan([GPOP13], HeNe1, 0, 5, 6))
 hdr1 = db[uid1]
-data = np.array(list(hdr.data(field='basler_cam_image', fill=True)))
+print(hdr1.table())
+data = np.array(list(hdr1.data(field="GPOP13_cam_image", fill=True)))
 print(f"{data.shape = }")
 
 # MAD-X simulations (equivalent of "count" with default parameters):
