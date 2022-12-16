@@ -41,6 +41,9 @@ jobs:
           export PYLON_CAMEMU=10
           echo "PYLON_CAMEMU=${PYLON_CAMEMU}" >> $GITHUB_ENV
 
+          export PYLON_CAM_PIXEL_FORMAT="Mono16"
+          echo "PYLON_CAMEMU=${PYLON_CAMEMU}" >> $GITHUB_ENV
+
           export PYLON_ROOT="/opt/pylon5"
           echo "PYLON_ROOT=${PYLON_ROOT}" >> $GITHUB_ENV
 
