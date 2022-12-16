@@ -102,6 +102,7 @@ PS_H_line = {
     "GT10H": "DARL35",
     "GT10V": "DARL36",
     "GD3": "PTEN04",
+    "HeNe1": "PTEN20",  # alignment laser
 }
 
 channel_dict = {}
@@ -298,7 +299,7 @@ class FrameGrabber(Device):
 fg3 = FrameGrabber(name="fg3")
 
 
-for el_id in ["GT9V", "GT10V", "GQ10", "GQ11", "GQ12"]:
+for el_id in ["GT9V", "GT10V", "GQ10", "GQ11", "GQ12", "HeNe1"]:
     el = channel_dict[el_id]
     channel_dict[el_id]["ophyd"] = ATFSignal(
         name=f"{el_id}_{el['name']}",  # ophyd API
@@ -312,6 +313,7 @@ GT10V = channel_dict["GT10V"]["ophyd"]
 GQ10 = channel_dict["GQ10"]["ophyd"]
 GQ11 = channel_dict["GQ11"]["ophyd"]
 GQ12 = channel_dict["GQ12"]["ophyd"]
+HeNe1 = channel_dict["HeNe1"]["ophyd"]
 
 
 def StopFGSavePicRunFG(fgN, FullPathFileName):
