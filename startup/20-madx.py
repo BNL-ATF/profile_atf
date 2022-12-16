@@ -53,5 +53,5 @@ else:
             plt.plot(tbl['madx_flyer_S'], tbl['madx_flyer_BETY'])
 
         """
-        yield from bps.mv(objects_var[parameter].value, value)
+        yield from bps.mv(objects[parameter].value, value)
         return (yield from bp.fly([madx_flyer]))
