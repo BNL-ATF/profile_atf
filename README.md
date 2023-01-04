@@ -1,7 +1,7 @@
 # profile_atf
 ATF IPython startup files for data collection via sockets
 
-Used Environment Variables
+## Used Environment Variables
 
 | Variable               | Requirement     | Description                      |
 | ---------------------- | ------------- | -------------------------------- |
