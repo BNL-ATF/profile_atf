@@ -183,7 +183,7 @@ class ATFSignalNoConn(Signal):
 
     def put(self, value):
         self._setpoint = float(value)
-
+        
         start_time = ttime.monotonic()
         getattr(atf_db, f"put_{self._dtype}")(
             atf_db.get_channel_index(
@@ -191,12 +191,17 @@ class ATFSignalNoConn(Signal):
             ),
             value,
         )
-        while ttime.monotonic() - start_time < self._timeout:
-            if abs(self._get_readback() - value) < self._tol:
-                break
-            else:
-                # not reached yet, wait a bit
-                ttime.sleep(0.1)
+        try:
+            if(ttime.monotonic() - start_time >= self._timeout):
+                raise Exception("Timeout")
+            while ttime.monotonic() - start_time < self._timeout:
+                if abs(self._get_readback() - value) < self._tol:
+                    break
+                else:
+                    # not reached yet, wait a bit
+                    ttime.sleep(0.1)
+        except Exception as err:
+            print("Value not reached within Timeout")
 
     def set(self, *args, **kwargs):
         self.put(*args, **kwargs)
