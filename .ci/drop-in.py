@@ -1,10 +1,11 @@
 print(f"Loading {__file__}")
 
+import os
 from datetime import datetime
 from ophyd.utils import make_dir_tree
 from pprint import pprint
 
-root_dir = "/tmp/basler"
+root_dir = os.path.expanduser("~/basler")
 _ = make_dir_tree(datetime.now().year, base_path=root_dir)
 
 pprint(GT9V.read())
