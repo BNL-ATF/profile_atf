@@ -23,13 +23,14 @@ else:
     connection = SirepoBluesky(ATF_SIREPO_URL)
     data, schema = connection.auth("madx", "00000002")
 
-    classes, objects = create_classes(connection.data,
-                                      connection=connection)
+    classes, objects = create_classes(connection.data, connection=connection)
     globals().update(**objects)
 
-    madx_flyer = MADXFlyer(connection=connection,
-                           root_dir="/tmp/sirepo_flyer_data/",
-                           report="elementAnimation250-20")
+    madx_flyer = MADXFlyer(
+        connection=connection,
+        root_dir="/tmp/sirepo_flyer_data/",
+        report="elementAnimation250-20",
+    )
 
 # RE(bp.fly([madx_flyer]))
 #
