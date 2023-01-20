@@ -12,7 +12,7 @@ from ophyd.utils import make_dir_tree
 
 db.reg.register_handler("madx", MADXFileHandler, overwrite=True)
 
-root_dir = "/tmp/sirepo_flyer_data"
+root_dir = os.path.expanduser("~/sirepo_flyer_data")
 _ = make_dir_tree(datetime.datetime.now().year, base_path=root_dir)
 
 ATF_SIREPO_URL = os.getenv("ATF_SIREPO_URL")
@@ -28,7 +28,7 @@ else:
 
     madx_flyer = MADXFlyer(
         connection=connection,
-        root_dir="/tmp/sirepo_flyer_data/",
+        root_dir=root_dir,
         report="elementAnimation250-20",
     )
 
