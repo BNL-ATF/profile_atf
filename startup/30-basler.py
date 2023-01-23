@@ -10,19 +10,19 @@ from ophyd_basler.basler_handler import BaslerCamHDF5Handler
 import logging
 from logging import StreamHandler
 
-logger = logging.getLogger("basler")
+logger_basler = logging.getLogger("basler")
 stream_handler = StreamHandler()
 log_file_format = (
     "[%(levelname)1.1s %(asctime)s.%(msecs)03d %(name)s"
     "  %(module)s:%(lineno)d] %(message)s"
 )
 stream_handler.setFormatter(logging.Formatter(fmt=log_file_format))
-logger.addHandler(stream_handler)
+logger_basler.addHandler(stream_handler)
 
-# logger.setLevel(logging.DEBUG)
+# logger_basler.setLevel(logging.DEBUG)
 # stream_handler.setLevel(logging.DEBUG)
 
-logger.setLevel(logging.INFO)
+logger_basler.setLevel(logging.INFO)
 stream_handler.setLevel(logging.INFO)
 ###############################################################################
 
