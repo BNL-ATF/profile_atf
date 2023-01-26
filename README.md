@@ -12,4 +12,3 @@ ATF IPython startup files for data collection via sockets
 | `ATF_SIREPO_URL`         | Optional      | Sirepo server URL with port number e.g. http://localhost:8000   |
 | `PYLON_CAMEMU`           | Optional      | Number of Emulated Cameras (int)          |
 | `PYLON_CAM_PIXEL_FORMAT` | Optional      | Default "Mono12", to change e.g. "Mono16"     |
-
