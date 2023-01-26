@@ -8,7 +8,9 @@ from ophyd import Component as Cpt
 from ophyd import Device, Signal
 from ophyd.sim import NullStatus
 
-import lib.atf_db_py3x as atf_db
+from atfdb import atfdb
+from atfdb.ophyd import ATFSignalNoConn, open_close_conn, ReadOnlyException
+
 
 ATF_SOCKET_HOST = os.getenv("ATF_SOCKET_HOST")
 if ATF_SOCKET_HOST is None:
@@ -29,7 +31,7 @@ def check_conn_once(envvar="ATF_OPEN_CONN_ONCE"):
 
 if check_conn_once():
     print("Opening socket connection to atf_db...")
-    atf_db.host_connect(ATF_SOCKET_HOST, ATF_SOCKET_PORT)  # generate socket
+    atfdb.host_connect(ATF_SOCKET_HOST, ATF_SOCKET_PORT)  # generate socket
 
 PS_H_line = {
     "LT1HX": "CAEN3",
@@ -120,110 +122,18 @@ for tag, name in PS_H_line.items():
         channel_dict[tag]["tol"] = 1e-1
 
 
-class open_close_conn(ContextDecorator):
-    """Decorator to open/close socket connections before and after ophyd calls."""
-
-    def __enter__(self):
-        atf_db.host_connect(ATF_SOCKET_HOST, ATF_SOCKET_PORT)  # generate socket
-        return self
-
-    def __exit__(self, *exc):
-        atf_db.host_disconnect()
-        return False
-
-
-class ATFSignalNoConn(Signal):
-    def __init__(
-        self,
-        psname,
-        db,
-        *args,
-        tol=0.0,
-        read_suffix="RAS;RB_CURRENT_SETPT",
-        write_suffix="CDS;SET_CURRENT_SETPT",
-        timeout=2.0,
-        dtype="real",
-        **kwargs,
-    ):
-        super().__init__(*args, **kwargs)
-        self._psname = psname
-        self._db = db
-        self._tol = tol
-        self._read_suffix = read_suffix
-        self._write_suffix = write_suffix
-        self._timeout = timeout  # seconds
-        self._dtype = dtype  # 'real', 'integer', etc. corresponding to the get_<dtype> functions from atf_db.
-
-        self._setpoint = None
-        self._readback = None
-
-        self._update_readback_setpoint()  # update setpoint and readback on init
-
-    def _get_readback(self):
-        self._readback = getattr(atf_db, f"get_{self._dtype}")(
-            atf_db.get_channel_index(f"{self._db}::{self._psname};{self._read_suffix}")
-        )
-        return self._readback
-
-    def _get_setpoint(self):
-        self._setpoint = getattr(atf_db, f"get_{self._dtype}")(
-            atf_db.get_channel_index(f"{self._db}::{self._psname};{self._write_suffix}")
-        )
-        return self._setpoint
-
-    def get(self):
-        return self._get_readback()
-
-    def get_setpoint(self):
-        return self._get_setpoint()
-
-    def _update_readback_setpoint(self):
-        self._get_readback()
-        self._get_setpoint()
-
-    def put(self, value):
-        self._setpoint = float(value)
-
-        start_time = ttime.monotonic()
-        getattr(atf_db, f"put_{self._dtype}")(
-            atf_db.get_channel_index(
-                f"{self._db}::{self._psname};{self._write_suffix}"
-            ),
-            value,
-        )
-        while ttime.monotonic() - start_time < self._timeout:
-            if abs(self._get_readback() - value) < self._tol:
-                break
-            else:
-                # not reached yet, wait a bit
-                ttime.sleep(0.1)
-
-    def set(self, *args, **kwargs):
-        self.put(*args, **kwargs)
-        return NullStatus()
-
-
 class ATFSignalWithConn(ATFSignalNoConn):
-    @open_close_conn()
-    def get(self):
-        return super().get()
+    ...
 
-    @open_close_conn()
-    def get_setpoint(self):
-        return super().get_setpoint()
 
-    @open_close_conn()
-    def _update_readback_setpoint(self):
-        super()._update_readback_setpoint()
-
-    @open_close_conn()
-    def put(self, value):
-        super().put(value)
-
-    @open_close_conn()
-    def set(self, *args, **kwargs):
-        return super().put(*args, **kwargs)
-
+for method in ("get", "get_setpoint", "_update_readback_setpoint", "put", "set"):
+    setattr(
+        ATFSignalWithConn,
+        method,
+        open_close_conn(
+            socket_server=ATF_SOCKET_HOST,
+            socket_port=ATF_SOCKET_PORT
+        )(getattr(ATFSignalWithConn, method)))
 
 if check_conn_once():
     ATFSignal = ATFSignalNoConn
@@ -231,23 +141,9 @@ else:
     ATFSignal = ATFSignalWithConn
 
 
-class ReadOnlyException(Exception):
-    ...
-
-
 class ATFSignalRO(ATFSignal):
     def put(self, *args, **kwargs):
         raise ReadOnlyException("Cannot set/put the read-only signal.")
-
-
-def read_fg(fg_num):
-    fgname = f"FRAME{fg_num}_DB::FGR{fg_num};"
-    xpos = atf_db.get_real(atf_db.get_channel_index(f"{fgname}RCX;CENTROID_X"))
-    ypos = atf_db.get_real(atf_db.get_channel_index(f"{fgname}RCY;CENTROID_Y"))
-    xsig = atf_db.get_real(atf_db.get_channel_index(f"{fgname}RSX;SIGMA_X"))
-    ysig = atf_db.get_real(atf_db.get_channel_index(f"{fgname}RSY;SIGMA_Y"))
-    pixsum = atf_db.get_double(atf_db.get_channel_index(f"{fgname}RM00;SUM_PIXELS"))
-    return [xpos, ypos, xsig, ysig, pixsum]
 
 
 class FrameGrabber(Device):
@@ -314,37 +210,3 @@ GQ10 = channel_dict["GQ10"]["ophyd"]
 GQ11 = channel_dict["GQ11"]["ophyd"]
 GQ12 = channel_dict["GQ12"]["ophyd"]
 HeNe1 = channel_dict["HeNe1"]["ophyd"]
-
-
-def StopFGSavePicRunFG(fgN, FullPathFileName):
-    fgname = "FRAME" + str(fgN) + "_DB::FGR" + str(fgN) + ";"
-    ReadButtonStatus = atf_db.get_binary(
-        atf_db.get_channel_index(fgname + "RRS;RUN_STOP_READBACK")
-    )
-    print("FG" + str(fgN) + " is at: " + str(ReadButtonStatus))
-    # time.sleep(1)
-    PushButton = atf_db.put_binary(
-        atf_db.get_channel_index(fgname + "CRS;RUN_STOP_CONTROL"), "STOP"
-    )
-    # time.sleep(1)
-    ReadButtonStatus = atf_db.get_binary(
-        atf_db.get_channel_index(fgname + "RRS;RUN_STOP_READBACK")
-    )
-    print("FG" + str(fgN) + " is now : " + str(ReadButtonStatus))
-    FileNameLog = atf_db.put_string(
-        atf_db.get_channel_index(fgname + "CIFN;IMAGE_FILE_NAME"), FullPathFileName
-    )
-    ttime.sleep(1)
-    PushButtonSave = atf_db.put_binary(
-        atf_db.get_channel_index(fgname + "CSIF;SAVE_IMAGE_FILE_CTRL"), "SAVING"
-    )
-    ttime.sleep(1)
-    PushButton = atf_db.put_binary(
-        atf_db.get_channel_index(fgname + "CRS;RUN_STOP_CONTROL"), "RUN"
-    )
-    # time.sleep(1)
-
-
-# StopFGSavePicRunFG(3, 'C:/Images/AE124/20220908/test.asc')
-# image_stats = read_fg(3)
-# print(image_stats)

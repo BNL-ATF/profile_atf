@@ -1,12 +1,13 @@
 print(f"Loading {__file__}")
 
 import atexit
+from atfdb import atfdb
 
 
-def teardown_my_shell(func, atf_db):
+def teardown_socket_connection(func, atfdb):
     if func():
         print("Closing socket connection to atf_db...")
-        atf_db.host_disconnect()
+        atfdb.host_disconnect()
     else:
         print(
             "Socket connection to atf_db is managed per call.\n"
@@ -15,4 +16,4 @@ def teardown_my_shell(func, atf_db):
         )
 
 
-atexit.register(teardown_my_shell, check_conn_once, atf_db)
+atexit.register(teardown_socket_connection, check_conn_once, atfdb)
