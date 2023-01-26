@@ -1,30 +1,15 @@
 print(f"Loading {__file__}")
 
+import logging
 import os
 import numpy as np
 import ophyd_basler
 from ophyd_basler.basler_camera import BaslerCamera
 from ophyd_basler.basler_handler import BaslerCamHDF5Handler
+from ophyd_basler.utils import logger_basler, configure_logger
 
-###############################################################################
-import logging
-from logging import StreamHandler
 
-logger_basler = logging.getLogger("basler")
-stream_handler = StreamHandler()
-log_file_format = (
-    "[%(levelname)1.1s %(asctime)s.%(msecs)03d %(name)s"
-    "  %(module)s:%(lineno)d] %(message)s"
-)
-stream_handler.setFormatter(logging.Formatter(fmt=log_file_format))
-logger_basler.addHandler(stream_handler)
-
-# logger_basler.setLevel(logging.DEBUG)
-# stream_handler.setLevel(logging.DEBUG)
-
-logger_basler.setLevel(logging.INFO)
-stream_handler.setLevel(logging.INFO)
-###############################################################################
+configure_logger(logger_basler, logging.INFO)
 
 db.reg.register_handler("BASLER_CAM_HDF5", BaslerCamHDF5Handler, overwrite=True)
 

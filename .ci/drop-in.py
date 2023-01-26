@@ -20,6 +20,13 @@ pprint(fg3.read())
 pprint(GPOP13.read())
 pprint(GPOP13.summary())
 
+# Add custom images to the emulated camera:
+from ophyd_basler.custom_images import get_wandering_gaussian_beam
+ny, nx = GPOP13.image_shape.get()
+WGB = get_wandering_gaussian_beam(nf=256, nx=nx, ny=ny, seed=6313448000)
+GPOP13.set_custom_images(WGB)
+GPOP13.exposure_time.put(2000)
+
 # Basler + Laser scan:
 uid1, = RE(bp.scan([GPOP13], HeNe1, 0, 5, 6))
 hdr1 = db[uid1]
