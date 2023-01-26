@@ -130,10 +130,10 @@ for method in ("get", "get_setpoint", "_update_readback_setpoint", "put", "set")
     setattr(
         ATFSignalWithConn,
         method,
-        open_close_conn(
-            socket_server=ATF_SOCKET_HOST,
-            socket_port=ATF_SOCKET_PORT
-        )(getattr(ATFSignalWithConn, method)))
+        open_close_conn(socket_server=ATF_SOCKET_HOST, socket_port=ATF_SOCKET_PORT)(
+            getattr(ATFSignalWithConn, method)
+        ),
+    )
 
 if check_conn_once():
     ATFSignal = ATFSignalNoConn
