@@ -4,13 +4,11 @@ import os
 import time as ttime
 from contextlib import ContextDecorator
 
+from atfdb import atfdb
+from atfdb.ophyd import ATFSignalNoConn, ReadOnlyException, open_close_conn
 from ophyd import Component as Cpt
 from ophyd import Device, Signal
 from ophyd.sim import NullStatus
-
-from atfdb import atfdb
-from atfdb.ophyd import ATFSignalNoConn, open_close_conn, ReadOnlyException
-
 
 ATF_SOCKET_HOST = os.getenv("ATF_SOCKET_HOST")
 if ATF_SOCKET_HOST is None:

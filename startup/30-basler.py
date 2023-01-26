@@ -2,12 +2,12 @@ print(f"Loading {__file__}")
 
 import logging
 import os
+
 import numpy as np
 import ophyd_basler
 from ophyd_basler.basler_camera import BaslerCamera
 from ophyd_basler.basler_handler import BaslerCamHDF5Handler
-from ophyd_basler.utils import logger_basler, configure_logger
-
+from ophyd_basler.utils import configure_logger, logger_basler
 
 configure_logger(logger_basler, logging.INFO)
 
