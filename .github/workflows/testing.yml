@@ -152,9 +152,12 @@ jobs:
         with:
           name: basler-custom-images
           path: |
-            /tmp/test_emulated_basler_camera.png  # raw input files passed to Pylon
-            ~/basler/                             # HDF5 file(s) generated after bluesky scan(s)
-            /tmp/wandering_gaussian_beam/*.png    # MPL grid plot of the images obtained via 'hdr.data(...)'
+            # raw input files passed to Pylon
+            # HDF5 file(s) generated after bluesky scan(s)
+            # MPL grid plot of the images obtained via 'hdr.data(...)'
+            /tmp/test_emulated_basler_camera.png
+            ~/basler/
+            /tmp/wandering_gaussian_beam/*.png
           if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
       - name: Check socket server logs
