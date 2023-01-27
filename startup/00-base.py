@@ -18,7 +18,6 @@ try:
 except Exception:
     pass
 
-
 RE = RunEngine({})
 RE.subscribe(db.insert)
 
