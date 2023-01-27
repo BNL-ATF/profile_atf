@@ -22,19 +22,24 @@ pprint(GPOP13.read())
 pprint(GPOP13.summary())
 
 # Add custom images to the emulated camera:
-from ophyd_basler.custom_images import get_wandering_gaussian_beam
+from ophyd_basler.custom_images import get_wandering_gaussian_beam, save_images
+from ophyd_basler.utils import plot_images
 
 ny, nx = GPOP13.image_shape.get()
 WGB = get_wandering_gaussian_beam(nf=256, nx=nx, ny=ny, seed=6313448000)
-GPOP13.set_custom_images(WGB)
+img_dir = save_images(WGB, img_dir="/tmp/wandering_gaussian_beam/")
+GPOP13.set_custom_images(img_dir=img_dir)
 GPOP13.exposure_time.put(2000)
 
 # Basler + Laser scan:
-(uid1,) = RE(bp.scan([GPOP13], HeNe1, 0, 5, 6))
+(uid1,) = RE(bp.scan([GPOP13], HeNe1, 0, 5, 20))
 hdr1 = db[uid1]
 print(hdr1.table())
 data = np.array(list(hdr1.data(field="GPOP13_image", fill=True)))
 print(f"{data.shape = }")
+
+plot_images(data, ncols=5, nrows=4, save_path="/tmp/test_emulated_basler_camera.png")
+
 
 # MAD-X simulations (equivalent of "count" with default parameters):
 (uid2,) = RE(bp.fly([madx_flyer]))

@@ -148,6 +148,15 @@ jobs:
           export ATF_PROFILE_TEST_STATUS="${status}"
           echo "ATF_PROFILE_TEST_STATUS=${ATF_PROFILE_TEST_STATUS}" >> $GITHUB_ENV
 
+      - uses: actions/upload-artifact@v3
+        with:
+          name: basler-custom-images
+          path: |
+            /tmp/test_emulated_basler_camera.png  # raw input files passed to Pylon
+            ~/basler/                             # HDF5 file(s) generated after bluesky scan(s)
+            /tmp/wandering_gaussian_beam/*.png    # MPL grid plot of the images obtained via 'hdr.data(...)'
+          if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
+
       - name: Check socket server logs
         run: |
           set -vxeuo pipefail
