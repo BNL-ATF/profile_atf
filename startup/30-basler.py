@@ -25,5 +25,5 @@ GPOP13 = BaslerCamera(
     verbose=True,
     pixel_format=pixel_format,
     name="GPOP13",
-    root_dir=os.path.expanduser("~/basler"),
+    root_dir=os.path.expanduser("~/mnt/atfsim_sirepo/data/basler"),
 )

@@ -118,6 +118,8 @@ for tag, name in PS_H_line.items():
         channel_dict[tag]["tol"] = 1e1
     if name[:4] == "DARL":
         channel_dict[tag]["tol"] = 1e-1
+    if name[:4] == "CAEN":
+        channel_dict[tag]["tol"] = 5e-3
 
 
 class ATFSignalWithConn(ATFSignalNoConn):
@@ -193,15 +195,17 @@ class FrameGrabber(Device):
 fg3 = FrameGrabber(name="fg3")
 
 
-for el_id in ["GT9V", "GT10V", "GQ10", "GQ11", "GQ12", "HeNe1"]:
+for el_id in ["TK1H", "GT9V", "GT10V", "GQ10", "GQ11", "GQ12", "HeNe1"]:
     el = channel_dict[el_id]
     channel_dict[el_id]["ophyd"] = ATFSignal(
         name=f"{el_id}_{el['name']}",  # ophyd API
         db=el["db"],
         psname=el["name"],
         tol=el["tol"],
+        timeout=3.0 if el_id == "TK1H" else 2.0,
     )
 
+TK1H = channel_dict["TK1H"]["ophyd"]
 GT9V = channel_dict["GT9V"]["ophyd"]
 GT10V = channel_dict["GT10V"]["ophyd"]
 GQ10 = channel_dict["GQ10"]["ophyd"]
