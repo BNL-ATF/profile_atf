@@ -6,7 +6,7 @@ from pprint import pprint
 
 from ophyd.utils import make_dir_tree
 
-root_dir = os.path.expanduser("~/basler")
+root_dir = os.path.expanduser("~/mnt/atfsim_sirepo/data/basler")
 _ = make_dir_tree(datetime.now().year, base_path=root_dir)
 
 pprint(GT9V.read())
@@ -45,6 +45,7 @@ plot_images(data, ncols=5, nrows=4, save_path="/tmp/test_emulated_basler_camera.
 (uid2,) = RE(bp.fly([madx_flyer]))
 hdr2 = db[uid2]
 print(hdr2.table(stream_name="madx_flyer", fill=True).T)
+
 
 # MAD-X simulations (equivalent of "count" with changed parameter(s)):
 def madx_plan():
