@@ -90,28 +90,10 @@ jobs:
       - name: Start MongoDB
         uses: supercharge/mongodb-github-action@1.6.0
 
-      - name: Get Sirepo running
-        run: |
-          set -vxeuo pipefail
-          git clone https://github.com/NSLS-II/sirepo-bluesky.git
-          cd sirepo-bluesky/
-          . scripts/start_sirepo.sh -d
-          export SIREPO_DOCKER_CONTAINER_ID
-          echo "SIREPO_DOCKER_CONTAINER_ID=${SIREPO_DOCKER_CONTAINER_ID}" >> $GITHUB_ENV
-
-      - name: Check Sirepo state
-        run: |
-          set -vxeuo pipefail
-          # Sleeping to allow sirepo time to start up
-          sleep 10
-          docker images
-          docker ps -a
-          container=$(docker ps -q -f id=${SIREPO_DOCKER_CONTAINER_ID})
-          docker logs ${SIREPO_DOCKER_CONTAINER_ID}
-          if [ -z "${container}" ]; then
-              echo "Container ID ${SIREPO_DOCKER_CONTAINER_ID} is not running. Exiting."
-              exit 1
-          fi
+      - name: Start Sirepo Docker container
+        uses: NSLS-II/start-sirepo-action@v1
+        with:
+          docker-binary: docker
 
       - name: Start fake socket server
         run: |
@@ -155,7 +137,7 @@ jobs:
             # raw input files passed to Pylon
             /tmp/wandering_gaussian_beam/*.png
             # HDF5 file(s) generated after bluesky scan(s)
-            ~/basler/
+            ~/mnt/atfsim_sirepo/data/
             # MPL grid plot of the images obtained via 'hdr.data(...)'
             /tmp/test_emulated_basler_camera.png
           if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`

@@ -16,7 +16,7 @@ else:
 
     db.reg.register_handler("madx", MADXFileHandler, overwrite=True)
 
-    root_dir = os.path.expanduser("~/sirepo_flyer_data")
+    root_dir = os.path.expanduser("~/mnt/atfsim_sirepo/data/sirepo_flyer_data")
     _ = make_dir_tree(datetime.datetime.now().year, base_path=root_dir)
 
     print(f"Using Sirepo at {ATF_SIREPO_URL}")
