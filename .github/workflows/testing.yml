@@ -95,6 +95,8 @@ jobs:
         uses: mrakitin/start-sirepo-action@test-new-beta-tag
         with:
           docker-binary: docker
+          sirepo-bluesky-repo: mrakitin/sirepo-bluesky
+          sirepo-bluesky-branch: latest-docker
 
       - name: Start fake socket server
         run: |
