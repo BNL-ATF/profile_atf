@@ -88,6 +88,8 @@ jobs:
           #   pip install -v git+https://github.com/BNL-ATF/ophyd-basler@main
           #   pip install -v git+https://github.com/BNL-ATF/atfdb@main
 
+          pip install -v git+https://github.com/mrakitin/sirepo-bluesky@latest-docker
+
           pip list
           conda list
 
