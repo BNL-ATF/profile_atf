@@ -100,8 +100,6 @@ jobs:
         uses: NSLS-II/start-sirepo-action@v2
         with:
           docker-binary: docker
-          sirepo-bluesky-repo: mrakitin/sirepo-bluesky
-          sirepo-bluesky-branch: latest-docker
 
       - name: Start fake socket server
         run: |
