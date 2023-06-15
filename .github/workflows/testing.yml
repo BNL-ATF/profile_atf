@@ -82,13 +82,10 @@ jobs:
           conda env list
           # mamba install -c conda-forge -y numpy matplotlib ipython ophyd bluesky databroker sirepo-bluesky
           pip install numpy matplotlib ipython ophyd bluesky databroker sirepo-bluesky "ophyd-basler>=0.2.1" "atfdb>=0.2.0"
-          mamba install -c conda-forge -y srwpy shadow3
 
           # Those lines are to install dev version of the packages. Update the branches as needed.
           #   pip install -v git+https://github.com/BNL-ATF/ophyd-basler@main
           #   pip install -v git+https://github.com/BNL-ATF/atfdb@main
-
-          pip install -v git+https://github.com/mrakitin/sirepo-bluesky@latest-docker
 
           pip list
           conda list
