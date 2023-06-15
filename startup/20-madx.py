@@ -23,9 +23,11 @@ else:
     connection = SirepoBluesky(ATF_SIREPO_URL)
     data, schema = connection.auth("madx", "00000002")  # BL2_TDC example
 
-    classes, objects = create_classes(connection.data,
-                                      connection=connection,
-                                      extra_model_fields=["rpnVariables", "commands", "elements"])
+    classes, objects = create_classes(
+        connection.data,
+        connection=connection,
+        extra_model_fields=["rpnVariables", "commands", "elements"],
+    )
     globals().update(**objects)
 
     madx_flyer = MADXFlyer(
@@ -33,7 +35,6 @@ else:
         root_dir=root_dir,
         report="elementAnimation250-20",
     )
-
 
     def madx_plan(parameter="ihq1", value=2.0):
         """A bluesky plan to use MAD-X simulation package within Sirepo (via sirepo-bluesky lib).

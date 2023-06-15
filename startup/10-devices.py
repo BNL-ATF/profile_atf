@@ -197,16 +197,16 @@ fg3 = FrameGrabber(name="fg3")
 
 
 for el_id in [
-        "GQ10",
-        "GQ11",
-        "GQ12",
-        "GT10V",
-        "GT9V",
-        "HQ1",
-        "HT2V",
-        "HeNe1",
-        "TK1H",
-    ]:
+    "GQ10",
+    "GQ11",
+    "GQ12",
+    "GT10V",
+    "GT9V",
+    "HQ1",
+    "HT2V",
+    "HeNe1",
+    "TK1H",
+]:
     el = channel_dict[el_id]
     channel_dict[el_id]["ophyd"] = ATFSignal(
         name=f"{el_id}_{el['name']}",  # ophyd API
