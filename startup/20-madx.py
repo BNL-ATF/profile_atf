@@ -24,7 +24,6 @@ else:
     data, schema = connection.auth("madx", "00000002")  # BL2_TDC example
 
     classes, objects = create_classes(
-        connection.data,
         connection=connection,
         extra_model_fields=["rpnVariables", "commands", "elements"],
     )
