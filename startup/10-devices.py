@@ -6,6 +6,7 @@ from contextlib import ContextDecorator
 
 from atfdb import atfdb
 from atfdb.ophyd import ATFSignalNoConn, ReadOnlyException, open_close_conn
+from bluesky import SupplementalData
 from ophyd import Component as Cpt
 from ophyd import Device, Signal
 from ophyd.sim import NullStatus
@@ -47,7 +48,7 @@ PS_H_line = {
     "HT1V": "DARL2",
     "HT2H": "DARL3",
     "HT2V": "DARL4",
-    "HQ1": "DARL149",
+    "HQ1": "DARL149",  # 'ihq1' in Sirepo
     "HQ2": "DARL150",
     "HQ3": "DARL151",
     "HT3H": "DARL9",
@@ -195,7 +196,17 @@ class FrameGrabber(Device):
 fg3 = FrameGrabber(name="fg3")
 
 
-for el_id in ["TK1H", "GT9V", "GT10V", "GQ10", "GQ11", "GQ12", "HeNe1"]:
+for el_id in [
+    "GQ10",
+    "GQ11",
+    "GQ12",
+    "GT10V",
+    "GT9V",
+    "HQ1",
+    "HT2V",
+    "HeNe1",
+    "TK1H",
+]:
     el = channel_dict[el_id]
     channel_dict[el_id]["ophyd"] = ATFSignal(
         name=f"{el_id}_{el['name']}",  # ophyd API
@@ -205,10 +216,16 @@ for el_id in ["TK1H", "GT9V", "GT10V", "GQ10", "GQ11", "GQ12", "HeNe1"]:
         timeout=3.0 if el_id == "TK1H" else 2.0,
     )
 
-TK1H = channel_dict["TK1H"]["ophyd"]
-GT9V = channel_dict["GT9V"]["ophyd"]
-GT10V = channel_dict["GT10V"]["ophyd"]
 GQ10 = channel_dict["GQ10"]["ophyd"]
 GQ11 = channel_dict["GQ11"]["ophyd"]
 GQ12 = channel_dict["GQ12"]["ophyd"]
+GT10V = channel_dict["GT10V"]["ophyd"]
+GT9V = channel_dict["GT9V"]["ophyd"]
+HQ1 = channel_dict["HQ1"]["ophyd"]
+HT2V = channel_dict["HT2V"]["ophyd"]
 HeNe1 = channel_dict["HeNe1"]["ophyd"]
+TK1H = channel_dict["TK1H"]["ophyd"]
+
+sd = SupplementalData()
+RE.preprocessors.append(sd)
+sd.baseline.extend([GQ10, GQ11, GQ12])
